@@ -2,6 +2,7 @@
 
 #include <unordered_map>
 #include <string>
+#include <vector>
 
 enum class ERR_CODE { 
     SUCCESS = 0, 
@@ -62,9 +63,18 @@ public:
         return ERR_CODE::SUCCESS;
     }
 
-    size_t length() const; // return the length of the dataset
+    size_t length() const{
+        return data.size();
+    };
 
-    ERR_CODE keys() const; // return every key of the dataset
+    std::string* keys() const {
+        std::string* result = new std::string[data.size()];
 
-    
+        size_t i = 0;
+        for (const auto& [key, value] : data) {
+            result[i++] = key;
+        }
+
+        return result;
+    }
 };
