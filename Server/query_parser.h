@@ -2,6 +2,7 @@
 
 #include <sstream>
 #include <string>
+#include <cctype>
 
 #include "data_storage.h"
 #include "query_result.h"
@@ -40,7 +41,10 @@ public:
         ss >> cmd;
 
         if (cmd == "INS") {
-            ss >> key >> value;
+            ss >> key;
+
+            std::getline(ss, value);
+            value = trim(value);
 
             ERR_CODE result = data.set(key, value);
 
@@ -94,7 +98,10 @@ public:
         }
 
         if (cmd == "UPD") {
-            ss >> key >> value;
+            ss >> key;
+
+            std::getline(ss, value);
+            value = trim(value);
 
             ERR_CODE result = data.update(key, value);
 
@@ -114,5 +121,22 @@ public:
         }
 
         return Query_result(false,400,"Invalid command");
+    }
+
+    std::string trim(const std::string& str) {
+        std::size_t start = 0;
+        std::size_t end = str.size();
+
+        while (start < end &&
+            std::isspace(static_cast<unsigned char>(str[start]))) {
+            ++start;
+        }
+
+        while (end > start &&
+            std::isspace(static_cast<unsigned char>(str[end - 1]))) {
+            --end;
+        }
+
+        return str.substr(start, end - start);
     }
 };
