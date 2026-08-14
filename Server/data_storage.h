@@ -3,6 +3,8 @@
 #include <string>
 #include <vector>
 #include <utility>
+#include <filesystem>
+#include <iostream>
 
 #include "sstable.h"
 #include "memtable.h"
@@ -26,9 +28,24 @@ private:
         sstable.write(memtable.entries());
         sstables.push_back(std::move(sstable));
         memtable.clear();
+        if (sstables.size() == 2)
+            compact();
     };
 
 public:
+
+    Data_storage(){
+        if(std::filesystem::exists("sstable_0.db")){
+            std::string filename = "sstable_0.db";
+            SSTable sstable(filename);
+            memtable = MemTable(sstable.read_all());
+            std::cout << "Sstable loaded" << std::endl;
+        }
+        else{
+            std::cout << "No Sstable detected" << std::endl;
+        }
+    };
+
     ERR_CODE get(const std::string& key,std::string& value) const {
         ENTRY_STATUS status = memtable.get(key, value);
 
@@ -90,4 +107,36 @@ public:
         memtable.put(key, value);
         return ERR_CODE::SUCCESS;
     };
+
+    void compact() {
+        std::cout << "SStable compacted" << std::endl;
+        std::map<std::string, Entry> merged;
+
+        for (const auto& sstable : sstables) {
+            auto entries = sstable.read_all();
+
+            for (const auto& [key, entry] : entries) {
+                merged[key] = entry;
+            }
+        }
+
+        for (auto it = merged.begin(); it != merged.end(); ) {
+            if (it->second.status == ENTRY_STATUS::DELETED)
+                it = merged.erase(it);
+            else
+                ++it;
+        }
+
+        SSTable compacted("sstable_compacted.db");
+        compacted.write(merged);
+
+        for (const auto& sstable : sstables) {
+            std::filesystem::remove(sstable.get_filename());
+        }
+
+        std::filesystem::rename("sstable_compacted.db", "sstable_0.db");
+
+        sstables.clear();
+        sstables.emplace_back("sstable_0.db");
+    }
 };
