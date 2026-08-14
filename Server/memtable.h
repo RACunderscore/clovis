@@ -12,6 +12,9 @@ private:
 public:
     static constexpr std::size_t MAX_MEMTABLE_SIZE = 1;
 
+    MemTable(){};
+    MemTable(std::map<std::string, Entry> data_):data(data_){};
+
     void put(const std::string& key,const std::string& value){
         data[key] = {value, ENTRY_STATUS::PRESENT};
     };
