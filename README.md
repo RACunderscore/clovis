@@ -8,4 +8,4 @@
 - Avoir un fichier de configuration qui parametre le comportement de CLOVIS (type de retour, valeur retrouner lors des INS,DEL,UPD, les ttk...).
 - Pouvoir rechercher plusieurs clés d'un coup ou lister les clés disponibles ? (comme un like)
 - Pouvoir rechercher avec des fonctions comme length ou sum ?
-- Stocker les valeurs dans un arbre binaires.
+- Implementer un systeme LSMTree pour le stockage des données. CHECK
