@@ -14,6 +14,10 @@ private:
 public:
     explicit SSTable(const std::string& filename): filename(filename) {}
 
+    const std::string& get_filename() const {
+        return filename;
+    }
+
     void write(const std::map<std::string, Entry>& data) {
         std::ofstream file(filename);
 
@@ -64,5 +68,42 @@ public:
         }
 
         return ENTRY_STATUS::NOT_PRESENT;
+    }
+
+    std::map<std::string, Entry> read_all() const {
+        std::map<std::string, Entry> data;
+
+        std::ifstream file(filename);
+
+        if (!file.is_open())
+            return data;
+
+        std::string line;
+
+        while (std::getline(file, line)) {
+            std::size_t first = line.find('|');
+            if (first == std::string::npos)
+                continue;
+
+            std::size_t second = line.find('|', first + 1);
+            if (second == std::string::npos)
+                continue;
+
+            std::string key = line.substr(0, first);
+
+            int status = std::stoi(
+                line.substr(first + 1, second - first - 1)
+            );
+
+            std::string value = line.substr(second + 1);
+
+            Entry entry;
+            entry.status = static_cast<ENTRY_STATUS>(status);
+            entry.value = value;
+
+            data[key] = entry;
+        }
+
+        return data;
     }
 };
