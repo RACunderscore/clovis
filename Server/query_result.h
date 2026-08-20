@@ -3,12 +3,19 @@
 #include <string>
 #include <sstream>
 
+enum class Response_format {
+    TEXT,
+    JSON,
+    XML
+};
+
 class Query_result {
 private:
     bool success;
     int status_code;
     std::string message;
     std::string value;
+    Response_format format;
 
     static std::string json_escape(const std::string& str) {
         std::string result;
@@ -88,8 +95,8 @@ private:
     }
 
 public:
-    Query_result(bool success_,int status_code_,const std::string& message_,const std::string& value_ = "")
-        :success(success_),status_code(status_code_),message(message_),value(value_) {}
+    Query_result(bool success_,int status_code_,const std::string& message_,const std::string& value_ = "", const Response_format format_ = Response_format::TEXT)
+        :success(success_),status_code(status_code_),message(message_),value(value_), format(format_) {}
 
     bool is_success() const {
         return success;
@@ -147,26 +154,19 @@ public:
         return ss.str();
     }
 
-    std::string to_http(const std::string& content_type = "application/json") const {
-        std::string body;
-        if (content_type == "application/json") {
-            body = to_json();
-        }
-        else if (content_type == "application/xml" || content_type == "text/xml") {
-            body = to_xml();
-        }
-        else {
-            body = to_text();
-        }
+    std::string serialize() const {
+    switch (format) {
+        case Response_format::TEXT:
+            return to_text();
 
-        std::stringstream response;
+        case Response_format::JSON:
+            return to_json();
 
-        response << "HTTP/1.1 " << status_code << " " << http_status_text() << "\r\n";
-        response << "Content-Type: " << content_type << "\r\n";
-        response << "Content-Length: " << body.size() << "\r\n";
-        response << "Connection: close\r\n";
-        response << "\r\n";
-        response << body;
-        return response.str();
+        case Response_format::XML:
+            return to_xml();
+
+        default:
+            return to_text();
     }
+}
 };
