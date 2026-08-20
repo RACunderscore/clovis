@@ -117,7 +117,7 @@ int main() {
                     std::cout << "Received: " << command << std::endl;
 
                     Query_result result = parser.parser(command);
-                    std::string response = result.to_json();
+                    std::string response = result.serialize();
 
                     ssize_t sent = send(fd,response.c_str(),response.size(),0);
                     if (sent < 0) {

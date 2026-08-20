@@ -37,48 +37,75 @@ public:
         std::string cmd;
         std::string key;
         std::string value;
+        std::string flags;
 
         ss >> cmd;
 
         if (cmd == "INS") {
             ss >> key;
-
             std::getline(ss, value);
-            value = trim(value);
+
+            if (!get_cleaned_value(&value)) {
+                return Query_result(false, 400,"Value must be enclosed in quotes");
+            }
 
             ERR_CODE result = data.set(key, value);
 
             if (result == ERR_CODE::SUCCESS) {
-                return Query_result(true,200,"Insert successful");
+                return Query_result(true, 200, "Insert successful");
             }
 
             if (result == ERR_CODE::KEY_ALREADY_EXISTS) {
-                return Query_result(false,409,"Key already exists");
+                return Query_result(false, 409, "Key already exists");
             }
 
             if (result == ERR_CODE::EMPTY_VALUE) {
-                return Query_result(false,400,"Value cannot be empty");
+                return Query_result(false, 400, "Value cannot be empty");
             }
 
-            return Query_result(false,400,"Insert failed");
+            return Query_result(false, 400, "Insert failed");
         }
 
         if (cmd == "GET") {
             ss >> key;
+
+            std::string format;
+            ss >> format;
+
+            Response_format response_format = Response_format::TEXT;
+
+            if (format == "--json") {
+                response_format = Response_format::JSON;
+            }
+            else if (format == "--xml") {
+                response_format = Response_format::XML;
+            }
+            else if (format == "--text" || format.empty()) {
+                response_format = Response_format::TEXT;
+            }
+            else {
+                return Query_result(false, 400, "Invalid response format");
+            }
 
             std::string value;
 
             ERR_CODE result = data.get(key, value);
 
             if (result == ERR_CODE::SUCCESS) {
-                return Query_result(true,200,"GET successful",value);
+                return Query_result(
+                    true,
+                    200,
+                    "GET successful",
+                    value,
+                    response_format
+                );
             }
 
             if (result == ERR_CODE::KEY_NOT_FOUND) {
-                return Query_result(false,404,"Key not found");
+                return Query_result(false, 404, "Key not found");
             }
 
-            return Query_result(false,400,"GET failed");
+            return Query_result(false, 400, "GET failed");
         }
 
         if (cmd == "DEL") {
@@ -101,7 +128,10 @@ public:
             ss >> key;
 
             std::getline(ss, value);
-            value = trim(value);
+            
+            if (!get_cleaned_value(&value)) {
+                return Query_result(false, 400,"Value must be enclosed in quotes");
+            }
 
             ERR_CODE result = data.update(key, value);
 
@@ -138,5 +168,23 @@ public:
         }
 
         return str.substr(start, end - start);
+    }
+
+    bool get_cleaned_value(std::string* value) {
+        *value = trim(*value);
+
+        if (value->empty() || value->front() != '"') {
+            return false;
+        }
+
+        std::size_t closing_quote = value->find('"', 1);
+
+        if (closing_quote == std::string::npos) {
+            return false;
+        }
+
+        std::string cleaned_value = trim(value->substr(1, closing_quote - 1));
+        *value = cleaned_value;
+        return true;
     }
 };
