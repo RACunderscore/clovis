@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
 #include <sstream>
+#include <cctype>
 #include "query_result.h"
 #include "data_storage.h"
 
@@ -58,6 +59,11 @@ public:
         }
 
         std::string cmd_str = query_str.substr(0, 3);
+
+        for (char& c : cmd_str) {
+            c = std::toupper(static_cast<unsigned char>(c));
+        }
+        
         std::stringstream ss(query_str.substr(4));
 
         if (cmd_str == "GET") {
