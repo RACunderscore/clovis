@@ -1,5 +1,6 @@
 #pragma once
 #include <string>
+#include <string_view>
 #include <sstream>
 #include <cctype>
 #include "query_result.h"
@@ -52,19 +53,19 @@ private:
     }
 
 public:
-    explicit Query(const std::string& query_str): raw_query(query_str), format(Response_format::TEXT), result(false, 0, "Pending execution"){
-        if (query_str.size() < 4 || query_str[3] != ' ') {
+    explicit Query(std::string_view query_view): raw_query(query_view), format(Response_format::TEXT), result(false, 0, "Pending execution"){
+        if (query_view.size() < 4 || query_view[3] != ' ') {
             command = Command::UNKNOWN;
             return;
         }
 
-        std::string cmd_str = query_str.substr(0, 3);
-
+        std::string_view cmd_view = query_view.substr(0, 3);
+        std::string cmd_str(cmd_view);
         for (char& c : cmd_str) {
             c = std::toupper(static_cast<unsigned char>(c));
         }
-        
-        std::stringstream ss(query_str.substr(4));
+
+        std::stringstream ss(std::string(query_view.substr(4)));
 
         if (cmd_str == "GET") {
             command = Command::GET;
@@ -98,13 +99,12 @@ public:
             result = Query_result(false, 400, "Invalid command");
             return;
         }
-        
 
         if (command == Command::GET) {
             std::string out_value;
             ERR_CODE err = db.get(key, out_value);
             if (err == ERR_CODE::SUCCESS) {
-                result = Query_result(true, 200, "GET successful", out_value, format);
+                result = Query_result(true, 200, "GET successful", std::move(out_value), format);
             } else {
                 result = Query_result(false, 404, "Key not found");
             }
