@@ -1,6 +1,6 @@
 # CLOVIS
 
-*A small Redis-like key/value database — named CLOVIS because I'm French.*
+*A small Redis-like key/value database - named CLOVIS because I'm French.*
 
 CLOVIS is a lightweight key/value database written in C++. The project aims to provide a simple database server with an event-driven architecture and an LSM-Tree-based storage engine.
 
@@ -108,7 +108,7 @@ CLOVIS can return the following errors:
 - [ ] Add a way to list available keys
 - [ ] Add key pattern matching (similar to `LIKE`)
 - [ ] Add query functions such as `length`, `sum`, etc.
-- [ ] Improve and refactor the query parser
+- [x] Improve and refactor the query parser
 
 ## What's Next?
 
@@ -118,18 +118,12 @@ The next steps for the project are:
    - Add more client-side functionality
    - Improve command handling and user interaction
 
-2. **Refactor the query parser**
-   - Simplify command parsing
-   - Improve validation
-   - Separate parsing from command execution
-   - Make response-format handling cleaner
-
-3. **Configuration**
+2. **Configuration**
    - Add a configuration file
    - Allow users to customize CLOVIS behavior
    - Configure response formats and command responses
 
-4. **Advanced queries**
+3. **Advanced queries**
    - Retrieve multiple keys
    - List available keys
    - Add key pattern matching
@@ -139,4 +133,4 @@ The next steps for the project are:
 
 CLOVIS is currently a work in progress.
 
-The basic client/server architecture, CRUD operations, configurable response formats, and LSM-Tree storage system are implemented. The next major focus is improving the query system, configuration, and client functionality.
+The basic client/server architecture, CRUD operations, configurable response formats, and LSM-Tree storage system are implemented. The next major focus is improving the configuration and client functionality.
