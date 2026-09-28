@@ -5,16 +5,15 @@
 #include <sys/epoll.h>
 #include <unistd.h>
 
+#include "query_result.h"
 #include "server_tcp.h"
 #include "data_storage.h"
-#include "query_parser.h"
-#include "query_result.h"
+#include "query.h"
 
 
 int main() {
     Server_tcp server;
     Data_storage data;
-    Query_parser parser(data);
 
     std::unordered_map<int, std::string> pending;
 
@@ -116,7 +115,9 @@ int main() {
 
                     std::cout << "Received: " << command << std::endl;
 
-                    Query_result result = parser.parser(command);
+                    Query query = Query(command);
+                    query.run(data);
+                    Query_result result = query.get_result();
                     std::string response = result.serialize();
 
                     ssize_t sent = send(fd,response.c_str(),response.size(),0);
