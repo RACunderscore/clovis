@@ -169,7 +169,6 @@ Invalid command
 - [ ] Add support for querying multiple keys at once
 - [ ] Add a way to list available keys
 - [ ] Add key pattern matching (similar to `LIKE`)
-- [ ] Add query functions such as `length`, `sum`, etc.
 
 ## What's Next?
 
@@ -182,7 +181,6 @@ Invalid command
    - Retrieve multiple keys
    - List available keys
    - Add key pattern matching
-   - Add basic functions such as `length` and `sum`
 
 3. **Further client improvements**
    - Consider additional client-side quality-of-life features
@@ -190,6 +188,6 @@ Invalid command
 
 ## Project Status
 
-CLOVIS is currently a work in progress.
+The V1.0 is almost finished. I'm still working on this little project.
 
 The basic client/server architecture, CRUD operations, configurable response formats, LSM-Tree storage system, and replxx-powered interactive command history are implemented. The next major focus is configuration and advanced query functionality.
