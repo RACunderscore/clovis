@@ -1,16 +1,13 @@
 #include <iostream>
 #include <string>
+#include <algorithm>
+#include <cctype>
 
-using namespace std;
+#include <replxx.hxx>
 
 #include "client_tcp.h"
 
-string get_user_command() {
-    cout << "User command: ";
-    string data;
-    getline(cin, data);
-    return data;
-}
+using namespace std;
 
 int main() {
     Client_tcp client;
@@ -18,17 +15,38 @@ int main() {
         return 1;
     }
 
+    replxx::Replxx input;
+
     while (true) {
-        string data = get_user_command();
-        if (data == "exit")
+        const char* line = input.input("CLOVIS >> ");
+
+        if (line == nullptr) {
+            cout << '\n';
             break;
+        }
+
+        const string data(line);
+        if (data.empty()) {
+            continue;
+        }
+
+        input.history_add(data);
+
+        string command = data;
+
+        std::transform(command.begin(), command.end(), command.begin(),[](unsigned char c) {
+            return std::tolower(c);
+        });
+
+        if (command == "exit") {
+            break;
+        }
 
         if (!client.send_data(data + "\n")) {
             break;
         }
 
-        string response = client.receive_data();
-
+        const string response = client.receive_data();
         if (response.empty()) {
             cout << "Server disconnected" << endl;
             break;
